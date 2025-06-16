@@ -6,6 +6,7 @@ import (
 
 	db "github.com/techschool/simplebank/db/sqlc"
 	"github.com/techschool/simplebank/pb"
+	"github.com/techschool/simplebank/token"
 	"github.com/techschool/simplebank/util"
 	"github.com/techschool/simplebank/val"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -35,7 +36,9 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 
 	accessToken, accessPayload, err := server.tokenMaker.CreateToken(
 		user.Username,
+		user.Role,
 		server.config.AccessTokenDuration,
+		token.TokenTypeAccessToken,
 	)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create access token")
@@ -43,7 +46,9 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 
 	refreshToken, refreshPayload, err := server.tokenMaker.CreateToken(
 		user.Username,
+		user.Role,
 		server.config.RefreshTokenDuration,
+		token.TokenTypeRefreshToken,
 	)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create refresh token")
